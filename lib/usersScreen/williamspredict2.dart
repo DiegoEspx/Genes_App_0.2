@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genesapp/usersScreen/WilliamsResultadoScreen.dart';
 import 'package:genesapp/widgets/custom_app_bar_simple.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -81,7 +82,9 @@ class WilliamspredictState extends State<Williamspredict2> {
   double? probabilidad;
 
   Future<void> _enviarFormulario() async {
-    const url = 'http://10.162.67.75:5000/predict'; // Cambia esto por tu IP local
+    const url = 'http://10.0.2.2:5000/predict';
+//http://10.0.2.2:5000/predict
+
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -91,17 +94,32 @@ class WilliamspredictState extends State<Williamspredict2> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        setState(() {
-          resultado = data['diagnostico'];
-          probabilidad = data['probabilidad'];
-        });
+        final resultado = data['diagnostico'];
+        final probabilidad = data['probabilidad'];
+
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => WilliamsResultadoScreen(
+              resultado: resultado,
+              probabilidad: probabilidad,
+            ),
+          ),
+        );
       } else {
-        setState(() => resultado = 'Error en la predicción');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error en la predicción")),
+        );
       }
     } catch (e) {
-      setState(() => resultado = 'Error de conexión: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error de conexión: $e")),
+      );
     }
-  }
+ }
 
   Widget _buildSwitch(String label, String keyName) {
     return SwitchListTile(

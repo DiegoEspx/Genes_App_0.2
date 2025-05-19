@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:genesapp/usersScreen/screens_guias/guias_screen.dart';
+import 'package:genesapp/widgets/email_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -76,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen>
               ),
             ),
           ),
-          // Condicional para evitar crash en emuladores x86
           if (!kIsWeb && defaultTargetPlatform != TargetPlatform.android)
             Positioned.fill(
               child: BackdropFilter(
@@ -170,19 +169,18 @@ class _RegisterScreenState extends State<RegisterScreen>
                             elevation: 8,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child:
-                              _loading
-                                  ? const CircularProgressIndicator(
+                          child: _loading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  'Registrarme',
+                                  style: TextStyle(
                                     color: Colors.white,
-                                  )
-                                  : const Text(
-                                    'Registrarme',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -222,16 +220,15 @@ class _RegisterScreenState extends State<RegisterScreen>
           fontWeight: FontWeight.bold,
         ),
         prefixIcon: Icon(icon, color: Colors.black),
-        suffixIcon:
-            toggleVisibility != null
-                ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility : Icons.visibility_off,
-                    color: Colors.black,
-                  ),
-                  onPressed: toggleVisibility,
-                )
-                : null,
+        suffixIcon: toggleVisibility != null
+            ? IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.black,
+                ),
+                onPressed: toggleVisibility,
+              )
+            : null,
         filled: true,
         fillColor: Colors.grey[200],
         enabledBorder: OutlineInputBorder(
@@ -247,11 +244,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Future<void> _register() async {
-    if (_passwordController.text.trim() !=
-        _confirmPasswordController.text.trim()) {
-      setState(() {
-        _error = 'Las contraseñas no coinciden';
-      });
+    if (_passwordController.text.trim() != _confirmPasswordController.text.trim()) {
+      setState(() => _error = 'Las contraseñas no coinciden');
       return;
     }
 
@@ -275,16 +269,16 @@ class _RegisterScreenState extends State<RegisterScreen>
           'created_at': DateTime.now(),
         });
 
-        Navigator.pushAndRemoveUntil(
+        await user.sendEmailVerification();
+        await _auth.signOut();
+
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const GuiasScreen()),
-          (Route<dynamic> route) => false,
+          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        _error = e.message ?? 'Error al registrar';
-      });
+      setState(() => _error = e.message ?? 'Error al registrar');
     } finally {
       setState(() => _loading = false);
     }

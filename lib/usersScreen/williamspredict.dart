@@ -345,7 +345,7 @@ class _WilliamspredictState extends State<Williamspredict> {
 
   Future<void> _enviarFormulario() async {
     const url =
-        'http://10.162.67.113:5000/predict'; // Change this to your local IP
+        'http://10.162.248.191:5000/predict'; // Change this to your local IP
     try {
       final response = await http.post(
         Uri.parse(url),
