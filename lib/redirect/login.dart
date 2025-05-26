@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:genesapp/redirect/register.dart';
 import 'package:genesapp/usersScreen/screens_guias/guias_screen.dart';
+import 'package:genesapp/widgets/email_verification_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -295,10 +296,8 @@ class _LoginScreenState extends State<LoginScreen>
   Future<void> _signInWithEmail() async {
     if (_emailController.text.trim().isEmpty ||
         _passwordController.text.trim().isEmpty) {
-      setState(
-        () =>
-            _error = 'Por favor completa todos los campos para iniciar sesión',
-      );
+      setState(() =>
+          _error = 'Por favor completa todos los campos para iniciar sesión');
       return;
     }
 
@@ -312,13 +311,26 @@ class _LoginScreenState extends State<LoginScreen>
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      await _navigateBasedOnRole(userCredential.user);
+
+      final user = userCredential.user;
+
+      if (user != null && !user.emailVerified) {
+        await _auth.signOut();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+        );
+        return;
+      }
+
+      await _navigateBasedOnRole(user);
     } on FirebaseAuthException catch (e) {
       setState(() => _error = e.message ?? 'Error al iniciar sesión');
     } finally {
       setState(() => _isLoading = false);
     }
   }
+
 
   Future<void> _signInWithGoogle() async {
     try {

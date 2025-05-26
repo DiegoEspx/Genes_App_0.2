@@ -28,6 +28,7 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^29.1.33
   path_provider: ^2.1.5
   image_picker: ^1.1.2
+  lottie: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,7 @@ flutter:
     - assets/images/down/interventricular.png
     - assets/images/down/persistenciadelconducto.jpg
     - assets/images/down/pulmonar.avif
+    - assets/animations/prediciendo_animation.json
 
 
 

@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:genesapp/usersScreen/screens_guias/guias_screen.dart';
-
+import 'package:genesapp/widgets/email_verification_screen.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -271,7 +270,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const GuiasScreen()),
+          MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
           (Route<dynamic> route) => false,
         );
       }

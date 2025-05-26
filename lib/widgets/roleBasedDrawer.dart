@@ -7,7 +7,7 @@ import 'package:genesapp/medicScreen/medico.dart';
 import 'package:genesapp/medicScreen/viewArticles.dart';
 import 'package:genesapp/pacientScreen/paciente.dart';
 import 'package:genesapp/usersScreen/perfil.dart';
-import 'package:genesapp/login.dart';
+import 'package:genesapp/redirect/login.dart';
 import 'package:genesapp/usersScreen/williamspredict.dart';
 import 'package:genesapp/usersScreen/williamspredict2.dart';
 
