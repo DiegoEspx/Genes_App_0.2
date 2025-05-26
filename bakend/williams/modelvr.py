@@ -12,9 +12,6 @@ import pickle
 
 
 
-# Guardar el OneHotEncoder en un archivo
-
-
 data_path = "prueba.xlsx"
 dataset = pd.read_excel(data_path)
 
@@ -29,31 +26,28 @@ binary_cols = dataset.columns.drop(['CASOS', 'TALLA/EDAD (ACTUAL)', 'Peso al nac
 onehotencoder = OneHotEncoder()
 categorical_data = onehotencoder.fit_transform(dataset[categorical_cols]).toarray()
 
-# Guardar el OneHotEncoder en un archivo
+
 with open('onehotencoder.pkl', 'wb') as f:
     pickle.dump(onehotencoder, f)
 
-# 📌 **Concatenar datos categóricos codificados con datos binarios directamente**
+
 X = np.concatenate((categorical_data, dataset[binary_cols].values), axis=1)
 
-# 📌 **Variable objetivo**
 y = dataset['Sospecha_WS'].values
 
-# 📌 **Aumentar datos con SMOTE (Si la cantidad de datos es baja)**
+
 smote = SMOTE(sampling_strategy='minority', random_state=42)
 X_resampled, y_resampled = smote.fit_resample(X, y)
 
-# 📌 **Dividir el conjunto de datos en entrenamiento y prueba (Asegurando Variabilidad con `stratify=y`)**
 X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, stratify=y_resampled, random_state=42)
 
-# 📌 **Validación Cruzada con `KFold` (5 divisiones)**
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
 for train_index, val_index in kf.split(X_train):
     X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
     y_train_fold, y_val_fold = y_train[train_index], y_train[val_index]
 
-    # 📌 **Construir la red neuronal con Regularización L2 y Dropout**
+   
     model = Sequential([
         Dense(32, activation='relu', kernel_regularizer=l2(0.01), input_shape=(X_train.shape[1],)),
         Dropout(0.5),
@@ -62,7 +56,7 @@ for train_index, val_index in kf.split(X_train):
         Dense(1, activation='sigmoid')
     ])
 
-    # 📌 **Compilar el modelo**
+    
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 
@@ -74,11 +68,11 @@ for train_index, val_index in kf.split(X_train):
 loss, accuracy = model.evaluate(X_test, y_test)
 print(f'Accuracy: {accuracy*100:.2f}%')
 
-# 📌 **Guardar el modelo en formato .keras recomendado**
+
 model.save("mod855.keras")
 
 
-new_data = np.random.rand(1, X_train.shape[1])  # Datos simulados
+new_data = np.random.rand(1, X_train.shape[1])  
 prediction = model.predict(new_data)
 print("Predicción del modelo en datos nuevos:", prediction)
 
@@ -92,13 +86,12 @@ plt.legend()
 plt.show()
 
 
-# 📌 **Imprimir el número de muestras en cada conjunto**
 print(f"Número total de datos (original): {X.shape[0]}")
 print(f"Número total de datos (después de SMOTE): {X_resampled.shape[0]}")
 print(f"Número de datos en entrenamiento: {X_train.shape[0]}")
 print(f"Número de datos en prueba: {X_test.shape[0]}")
 
-# 📌 **Contar cantidad de características**
+
 number_of_features = X.shape[1]
 number_of_features2 = X_train.shape[1]
 print(f"El número total de características después del preprocesamiento es: {number_of_features} , {number_of_features2}")
@@ -109,11 +102,9 @@ total_feature_names = np.concatenate((categorical_feature_names, binary_cols))
 print("Nombres de todas las características después del preprocesamiento y codificación:")
 print(total_feature_names)
 
-print(pd.Series(y).value_counts())  # Para ver el balance de clases antes de SMOTE
+print(pd.Series(y).value_counts())  
 print("precision")
 
-
-###prediccion
 feature_names = [
     'TALLA/EDAD (ACTUAL)_0', 'TALLA/EDAD (ACTUAL)_Alto', 'TALLA/EDAD (ACTUAL)_Bajo', 'TALLA/EDAD (ACTUAL)_Normal',
     'Peso al nacer/edad gestacional_0', 'Peso al nacer/edad gestacional_Adecuado', 
@@ -196,13 +187,13 @@ data = {
   "DÉFICIT DE CRECIMIENTO": 0
 }
 
-# 📌 Convertir los datos a un DataFrame asegurando el orden de las características
+
 input_data = pd.DataFrame([data], columns=feature_names)
 
-# 📌 Convertir a numpy array para la predicción
+
 input_array = input_data.values.astype(float)
 
-# 📌 Realizar la predicción
+
 prediction = model.predict(input_array)
 
 

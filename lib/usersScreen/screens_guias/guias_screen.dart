@@ -5,6 +5,7 @@ import 'package:genesapp/usersScreen/screens_guias/mucopolisacaridosis/mps_guia.
 import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sdown_guia.dart';
 import 'package:genesapp/usersScreen/screens_guias/sindrome_williams/swilliams_guia.dart';
 import 'package:genesapp/widgets/app_colors.dart';
+import 'package:genesapp/widgets/auth_guard.dart';
 import 'package:genesapp/widgets/custom_app_bar.dart';
 import 'package:genesapp/widgets/roleBasedDrawer.dart';
 
@@ -71,7 +72,9 @@ class _GuiasScreenState extends State<GuiasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return AuthGuard(
+      child: Scaffold(
       key: _scaffoldKey,
       appBar: CustomAppBarWithDrawer(
         color: syndromes[currentIndex]["color"],
@@ -238,6 +241,7 @@ class _GuiasScreenState extends State<GuiasScreen> {
                   ],
                 ),
               ),
+    ),
     );
   }
 }

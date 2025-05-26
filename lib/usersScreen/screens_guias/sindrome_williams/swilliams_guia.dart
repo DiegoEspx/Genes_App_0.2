@@ -6,6 +6,7 @@ import 'package:genesapp/usersScreen/screens_guias/sindrome_williams/sub_screens
 import 'package:genesapp/usersScreen/screens_guias/sindrome_williams/sub_screens/sw_fenotipos_screen.dart';
 import 'package:genesapp/usersScreen/screens_guias/sindrome_williams/sub_screens/sw_manejo_screen.dart';
 import 'package:genesapp/usersScreen/screens_guias/sindrome_williams/sub_screens/sw_diferencial_screen.dart';
+import 'package:genesapp/widgets/auth_guard.dart';
 
 // Pantalla principal
 class GuiaSindromeWilliams extends StatelessWidget {
@@ -13,7 +14,8 @@ class GuiaSindromeWilliams extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AuthGuard(
+      child: Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -118,6 +120,7 @@ class GuiaSindromeWilliams extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

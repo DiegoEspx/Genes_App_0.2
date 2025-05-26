@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:genesapp/widgets/email_verification_screen.dart';
+import 'package:genesapp/widgets/institutional_email_validator.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -244,6 +245,15 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     if (_passwordController.text.trim() != _confirmPasswordController.text.trim()) {
       setState(() {
         _error = 'Las contraseñas no coinciden';
+      });
+      return;
+    }
+    //  Validación de correo institucional
+    final email = _emailController.text.trim();
+    final emailError = InstitutionalEmailValidator.validate(email);
+    if (emailError != null) {
+      setState(() {
+        _error = emailError;
       });
       return;
     }

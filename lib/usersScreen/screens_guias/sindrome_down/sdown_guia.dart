@@ -6,13 +6,15 @@ import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_
 import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_diagnostico_screen.dart';
 import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_diferencial_screen.dart';
 import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_manejo_screen.dart';
+import 'package:genesapp/widgets/auth_guard.dart';
 
 class GuiaSindromeDown extends StatelessWidget {
   const GuiaSindromeDown({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AuthGuard(
+      child: Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -117,6 +119,7 @@ class GuiaSindromeDown extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

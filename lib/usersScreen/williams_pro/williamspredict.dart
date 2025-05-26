@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:genesapp/widgets/custom_app_bar_simple.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:genesapp/widgets/custom_app_bar_simple.dart'; 
 
 // Widget to display information for each question
 class QuestionInfo extends StatelessWidget {
@@ -346,7 +346,7 @@ class _WilliamspredictState extends State<Williamspredict> {
 
   Future<void> _enviarFormulario() async {
     const url =
-        'http://10.162.67.81:5000/predict'; // Change this to your local IP
+        'http://10.162.248.191:5000/predict'; // Change this to your local IP
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -475,10 +475,9 @@ class _WilliamspredictState extends State<Williamspredict> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBarSimple(
-      title: "Predictividad Williams",
-      color: Colors.blue, // Puedes cambiar el color según necesites
+        title: "Predictividad Williams",
+        color: Colors.blueAccent,
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           controller: _scrollController,
