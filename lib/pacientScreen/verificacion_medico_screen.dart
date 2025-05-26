@@ -70,7 +70,8 @@ class _VerificarMedicoScreenState extends State<VerificarMedicoScreen> {
     );
 
     var uri = Uri.parse(
-      'https://genesapp.centralus.cloudapp.azure.com/api1/verificacion/enviar',
+      //'https://genesapp.centralus.cloudapp.azure.com/api1/verificacion/enviar',
+      'http://10.162.67.105:5001/verificacion/enviar',
     );
     var request = http.MultipartRequest('POST', uri);
     request.fields['nombre'] = _nameController.text.trim();

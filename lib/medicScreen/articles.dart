@@ -40,20 +40,24 @@ class _SubirArticuloScreenState extends State<SubirArticuloScreen> {
       _mensaje = null;
     });
 
-    final uri = Uri.parse(
-      'https://genesapp.centralus.cloudapp.azure.com/api2/upload',
-    );
-
-    final request = http.MultipartRequest('POST', uri);
-    request.files.add(
-      await http.MultipartFile.fromPath('file', _archivo!.path),
-    );
-    request.fields['uid'] = user.uid;
-    request.fields['email'] = user.email ?? '';
+    final uri = Uri.parse('http://192.168.20.30:5000/api2/upload');
 
     try {
+      print('🟡 Archivo seleccionado: ${_archivo!.path}');
+      print('🟡 Enviando archivo a: $uri');
+      print('🟡 Usuario: ${user.uid} - ${user.email}');
+
+      final request = http.MultipartRequest('POST', uri);
+      request.files.add(
+        await http.MultipartFile.fromPath('file', _archivo!.path),
+      );
+      request.fields['uid'] = user.uid;
+      request.fields['email'] = user.email ?? '';
+
       final response = await request.send();
+      print('📨 Código de respuesta: ${response.statusCode}');
       final responseBody = await response.stream.bytesToString();
+      print('📨 Cuerpo de respuesta: $responseBody');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(responseBody);
@@ -66,12 +70,15 @@ class _SubirArticuloScreenState extends State<SubirArticuloScreen> {
           'fecha': Timestamp.now(),
         });
 
-        setState(() => _mensaje = 'Archivo subido correctamente ✅');
+        setState(() => _mensaje = '✅ Archivo subido correctamente');
       } else {
-        setState(() => _mensaje = 'Error al subir archivo: $responseBody');
+        setState(
+          () => _mensaje = '❌ Error ${response.statusCode}: $responseBody',
+        );
       }
     } catch (e) {
-      setState(() => _mensaje = 'Error de conexión: $e');
+      print('❌ Error en la subida: $e');
+      setState(() => _mensaje = '❌ Error de conexión: $e');
     } finally {
       setState(() => _isUploading = false);
     }
