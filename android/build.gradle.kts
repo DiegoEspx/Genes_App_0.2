@@ -2,7 +2,7 @@ import org.gradle.api.tasks.Delete
 
 plugins {
     id("com.android.application") version "8.7.0" apply false
-    id("com.google.gms.google-services") version "4.3.10" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 allprojects {

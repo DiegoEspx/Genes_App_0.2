@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:genesapp/adminScreen/admin_dashboard_screen.dart';
 import 'package:genesapp/adminScreen/verificacion_screen.dart';
-import 'package:genesapp/medicScreen/articles.dart';
-import 'package:genesapp/medicScreen/medico.dart';
 import 'package:genesapp/medicScreen/viewArticles.dart';
 import 'package:genesapp/pacientScreen/paciente.dart';
 import 'package:genesapp/usersScreen/perfil.dart';
-import 'package:genesapp/redirect/login.dart';
 import 'package:genesapp/usersScreen/williams_predict/williamspredict.dart';
 import 'package:genesapp/usersScreen/williamspredict2.dart';
+import 'package:genesapp/login.dart';
+//import 'package:genesapp/redirect/login.dart';
 
 class RoleBasedDrawer extends StatelessWidget {
   final String? role;

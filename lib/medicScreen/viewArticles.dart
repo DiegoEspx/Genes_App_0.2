@@ -39,7 +39,7 @@ class _VerArticulosScreenState extends State<VerArticulosScreen> {
 
       final uri = Uri.parse(
         //'https://genesapp.centralus.cloudapp.azure.com/api2/upload',
-        'http://10.162.67.105:5000/api2/upload',
+        'http://192.168.20.30:5000/api2/upload',
       );
 
       final request = http.MultipartRequest('POST', uri);
@@ -117,7 +117,7 @@ class _VerArticulosScreenState extends State<VerArticulosScreen> {
               itemBuilder: (context, index) {
                 final data = articulos[index].data() as Map<String, dynamic>;
                 final nombre = data['nombreArchivo'] ?? 'Sin nombre';
-                final url = 'http://10.162.67.105:5000/uploads/$nombre';
+                final url = 'http://192.168.20.30:5000/uploads/$nombre';
                 //'https://genesapp.centralus.cloudapp.azure.com/api2/upload/$nombre';
                 final email = data['email'] ?? 'Desconocido';
                 final fecha =

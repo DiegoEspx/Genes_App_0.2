@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:genesapp/widgets/app_colors.dart';
 import 'firebase_options.dart';
-import 'package:genesapp/redirect/login.dart';
+//import 'package:genesapp/redirect/login.dart';
+import 'package:genesapp/login.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

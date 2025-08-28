@@ -10,14 +10,14 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        // Sube de 1_8 a 11
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        // Sube de "1.8" a "11"
+        jvmTarget = "11"
     }
 
     defaultConfig {
@@ -27,8 +27,6 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
-   
 
     buildTypes {
         getByName("release") {
