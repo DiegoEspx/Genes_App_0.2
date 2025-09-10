@@ -8,6 +8,9 @@ import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_
 import 'package:genesapp/usersScreen/screens_guias/sindrome_down/sub_screens/sd_manejo_screen.dart';
 import 'package:genesapp/widgets/auth_guard.dart';
 
+// ⬇️ importa el FAB del chat
+import 'package:genesapp/agente_doctor/presentation/widgets/chat_fab.dart';
+
 class GuiaSindromeDown extends StatelessWidget {
   const GuiaSindromeDown({super.key});
 
@@ -15,111 +18,122 @@ class GuiaSindromeDown extends StatelessWidget {
   Widget build(BuildContext context) {
     return AuthGuard(
       child: Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: FadeIn(
-                  duration: const Duration(milliseconds: 400),
-                  child: Image.asset(
-                    "assets/images/down/Down-Syndrome-1.webp",
-                    height: 220,
-                    fit: BoxFit.cover,
+        // ⬇️ FAB tipo WhatsApp para abrir el chat IA
+        floatingActionButton: const ChatFab(
+          label: 'Chat IA',
+          extended: true,
+          heroTag: 'chat-ia-down',
+          // Opcional: colores estilo WhatsApp
+          // backgroundColor: Color(0xFF25D366),
+          // foregroundColor: Colors.white,
+        ),
+
+        body: SingleChildScrollView(
+          // ⬇️ padding inferior extra para que el FAB no tape el contenido
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: FadeIn(
+                    duration: const Duration(milliseconds: 400),
+                    child: Image.asset(
+                      "assets/images/down/Down-Syndrome-1.webp",
+                      height: 220,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            FadeInUp(
-              duration: const Duration(milliseconds: 800),
-              child: const Text(
-                "¿Qué es el Síndrome de Down?",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const SizedBox(height: 20),
+              FadeInUp(
+                duration: const Duration(milliseconds: 800),
+                child: const Text(
+                  "¿Qué es el Síndrome de Down?",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            FadeInUp(
-              duration: const Duration(milliseconds: 900),
-              child: const Text(
-                "El Síndrome de Down es una alteración genética causada por la presencia de una tercera copia total o parcial del cromosoma 21. Se asocia con discapacidad intelectual, características físicas típicas y un riesgo aumentado de ciertas enfermedades congénitas.",
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.justify,
+              const SizedBox(height: 10),
+              FadeInUp(
+                duration: const Duration(milliseconds: 900),
+                child: const Text(
+                  "El Síndrome de Down es una alteración genética causada por la presencia de una tercera copia total o parcial del cromosoma 21. Se asocia con discapacidad intelectual, características físicas típicas y un riesgo aumentado de ciertas enfermedades congénitas.",
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.justify,
+                ),
               ),
-            ),
-            const SizedBox(height: 30),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 600;
-                return Wrap(
-                  spacing: 15,
-                  runSpacing: 15,
-                  children: [
-                    _tarjetaSeccion(
-                      "Fenotipo",
-                      "Características faciales, corporales y neuromusculares típicas.",
-                      Icons.face,
-                      Colors.blueAccent,
-                      context,
-                      const FenotipoDownScreen(),
-                      isWide,
-                    ),
-                    _tarjetaSeccion(
-                      "Cardiovascular",
-                      "Defectos congénitos del corazón y riesgo de hipertensión pulmonar.",
-                      Icons.favorite,
-                      Colors.redAccent,
-                      context,
-                      const CardiovascularDownScreen(),
-                      isWide,
-                    ),
-                    _tarjetaSeccion(
-                      "Cognitivo",
-                      "Desarrollo intelectual, social y conductual.",
-                      Icons.psychology,
-                      Colors.purpleAccent,
-                      context,
-                      const CognitivoDownScreen(),
-                      isWide,
-                    ),
-                    _tarjetaSeccion(
-                      "Diagnóstico",
-                      "Evaluación física y pruebas genéticas específicas.",
-                      Icons.science,
-                      Colors.green,
-                      context,
-                      const DiagnosticoDownScreen(),
-                      isWide,
-                    ),
-                    _tarjetaSeccion(
-                      "Diferencial",
-                      "Otras condiciones con fenotipos similares.",
-                      Icons.compare,
-                      Colors.orangeAccent,
-                      context,
-                      const DiagnosticoDiferencialDownScreen(),
-                      isWide,
-                    ),
-                    _tarjetaSeccion(
-                      "Manejo",
-                      "Enfoque multidisciplinario e intervención temprana.",
-                      Icons.medical_services,
-                      Colors.teal,
-                      context,
-                      const ManejoSindromeDownScreen(),
-                      isWide,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+              const SizedBox(height: 30),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth > 600;
+                  return Wrap(
+                    spacing: 15,
+                    runSpacing: 15,
+                    children: [
+                      _tarjetaSeccion(
+                        "Fenotipo",
+                        "Características faciales, corporales y neuromusculares típicas.",
+                        Icons.face,
+                        Colors.blueAccent,
+                        context,
+                        const FenotipoDownScreen(),
+                        isWide,
+                      ),
+                      _tarjetaSeccion(
+                        "Cardiovascular",
+                        "Defectos congénitos del corazón y riesgo de hipertensión pulmonar.",
+                        Icons.favorite,
+                        Colors.redAccent,
+                        context,
+                        const CardiovascularDownScreen(),
+                        isWide,
+                      ),
+                      _tarjetaSeccion(
+                        "Cognitivo",
+                        "Desarrollo intelectual, social y conductual.",
+                        Icons.psychology,
+                        Colors.purpleAccent,
+                        context,
+                        const CognitivoDownScreen(),
+                        isWide,
+                      ),
+                      _tarjetaSeccion(
+                        "Diagnóstico",
+                        "Evaluación física y pruebas genéticas específicas.",
+                        Icons.science,
+                        Colors.green,
+                        context,
+                        const DiagnosticoDownScreen(),
+                        isWide,
+                      ),
+                      _tarjetaSeccion(
+                        "Diferencial",
+                        "Otras condiciones con fenotipos similares.",
+                        Icons.compare,
+                        Colors.orangeAccent,
+                        context,
+                        const DiagnosticoDiferencialDownScreen(),
+                        isWide,
+                      ),
+                      _tarjetaSeccion(
+                        "Manejo",
+                        "Enfoque multidisciplinario e intervención temprana.",
+                        Icons.medical_services,
+                        Colors.teal,
+                        context,
+                        const ManejoSindromeDownScreen(),
+                        isWide,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -148,10 +162,9 @@ class GuiaSindromeDown extends StatelessWidget {
           ),
           child: Container(
             padding: const EdgeInsets.all(15),
-            width:
-                isWide
-                    ? MediaQuery.of(context).size.width * 0.42
-                    : MediaQuery.of(context).size.width * 0.85,
+            width: isWide
+                ? MediaQuery.of(context).size.width * 0.42
+                : MediaQuery.of(context).size.width * 0.85,
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(15),

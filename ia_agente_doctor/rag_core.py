@@ -165,12 +165,14 @@ def generate_answer(
         )
     inferred = _extract_topic(user_msg)
     effective_topic = topic or inferred
-    where: Dict = {}
-    if effective_topic: where["topic"] = effective_topic
-    if min_year is not None: where["year"] = {"$gte": min_year}
-    if types: where["type"] = {"$in": types}
-    if lang: where["lang"] = lang
-    rag_text, metas = query_context(user_msg, k=8, where=where or None)
+    where = _compose_where(
+        topic=effective_topic,
+        lang=lang,
+        min_year=min_year,
+        types=types,
+    )
+    rag_text, metas = query_context(user_msg, k=8, where=where)
+
     if not rag_text:
         return ("No recuperé información suficiente para responder con calidad.", [], [])
     SYSTEM_PROMPT = """
@@ -236,3 +238,29 @@ def delete_document(doc_id: str) -> int:
         _collection.delete(where={"doc_id": doc_id})
 
     return count
+
+def _compose_where(
+    topic: str | None = None,
+    lang: str | None = None,
+    min_year: int | None = None,
+    types: list[str] | None = None,
+    doc_id: str | None = None,
+) -> dict | None:
+    """Convierte filtros sueltos en un where válido para Chroma >= 0.5."""
+    parts = []
+    if topic:
+        parts.append({"topic": {"$eq": topic}})
+    if lang:
+        parts.append({"lang": {"$eq": lang}})
+    if min_year is not None:
+        parts.append({"year": {"$gte": min_year}})
+    if types:
+        parts.append({"type": {"$in": types}})
+    if doc_id:
+        parts.append({"doc_id": {"$eq": doc_id}})
+
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return parts[0]
+    return {"$and": parts}
