@@ -3,9 +3,10 @@ import os, re
 from typing import List, Dict, Tuple
 import chromadb
 from chromadb.config import Settings
+from functools import lru_cache
 
 # ===== Config =====
-LLM_MODEL   = os.getenv("LLM_MODEL", "llama3.1")    
+LLM_MODEL   = os.getenv("LLM_MODEL", "llama3.1")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 CHROMA_DIR  = os.getenv("CHROMA_DIR", "chroma_db")
 COLLECTION  = os.getenv("COLLECTION_NAME", "rare_diseases")
@@ -32,9 +33,23 @@ def _embed(texts: List[str]) -> List[List[float]]:
     import ollama
     vecs: List[List[float]] = []
     for t in texts:
-        r = ollama.embeddings(model=EMBED_MODEL, prompt=t)
+        r = ollama.embeddings(
+            model=EMBED_MODEL,
+            prompt=t,
+            options={"keep_alive": "30m"}  # ⚡ evita cold start del embedder
+        )
         vecs.append(r["embedding"])
     return vecs
+
+@lru_cache(maxsize=256)
+def _embed_one(text: str) -> List[float]:
+    import ollama
+    r = ollama.embeddings(
+        model=EMBED_MODEL,
+        prompt=text,
+        options={"keep_alive": "30m"}  # ⚡ cache + warm
+    )
+    return r["embedding"]
 
 # --- Guardrails de dominio/tema ---
 _HEALTH_KEYWORDS = {
@@ -114,8 +129,8 @@ def upsert_document(
     )
     return len(chunks)
 
-def query_context(query: str, k: int = 8, where: dict | None = None) -> Tuple[str, List[Dict]]:
-    qvec = _embed([query])[0]
+def query_context(query: str, k: int = 5, where: dict | None = None) -> Tuple[str, List[Dict]]:  # k=5 ⚡
+    qvec = _embed_one(query)  # ⚡ cache de embedding del query
     res = _collection.query(query_embeddings=[qvec], n_results=k, where=where)
     docs  = res.get("documents", [[]])[0]
     metas = res.get("metadatas", [[]])[0]
@@ -136,7 +151,7 @@ def format_apa6_list(metas: List[Dict], limit: int = 4) -> List[str]:
     for m in metas:
         if not m: continue
         doc_id = m.get("doc_id")
-        if not doc_id or doc_id in seen: 
+        if not doc_id or doc_id in seen:
             continue
         seen[doc_id] = True
         src = m.get("source", "Fuente desconocida")
@@ -158,7 +173,7 @@ def generate_answer(
     types: list[str] | None = None,
     lang: str | None = None,
 ) -> Tuple[str, List[Dict], List[str]]:
-    if not _is_health_related(user_msg):
+    if not _is_health_related(user_msg) and topic is None:
         return (
             "Me centro exclusivamente en temas médicos (en especial enfermedades raras). "
             "Tu consulta parece ser de otro ámbito.", [], []
@@ -171,16 +186,23 @@ def generate_answer(
         min_year=min_year,
         types=types,
     )
-    rag_text, metas = query_context(user_msg, k=8, where=where)
+    rag_text, metas = query_context(user_msg, k=5, where=where)  # k=5 ⚡
 
     if not rag_text:
         return ("No recuperé información suficiente para responder con calidad.", [], [])
     SYSTEM_PROMPT = """
-Eres un asistente médico educativo especializado en enfermedades raras.
-Respondes SIEMPRE en español; sé breve (3–6 oraciones), claro y empático.
-No das diagnósticos ni dosis; no sustituyes a un profesional de la salud.
-Indica señales de alarma y recomienda atención médica cuando sea pertinente.
-"""
+                    Eres un asistente EDUCATIVO de salud, especializado en enfermedades raras.
+                    Objetivo: ofrecer información general basada en evidencia (definiciones, síntomas/signos,
+                    causas, pruebas diagnósticas a alto nivel y opciones de manejo generales), sin dar
+                    diagnósticos personalizados ni dosis de medicamentos.
+
+                    Reglas:
+                    - Responde SIEMPRE en español, claro y conciso (4-8 oraciones).
+                    - SÍ puedes enumerar síntomas y signos cuando te lo pidan.
+                    - Evita frases como “no puedo proporcionar asistencia médica directa”.
+                    En lugar de eso, da información general segura y una breve advertencia si procede.
+                    - No sustituyes a un profesional; incluye señales de alarma cuando sea pertinente.
+                    """
     topic_line = f"Tópico: {effective_topic}\n" if effective_topic else ""
     CONTEXT_BLOCK = topic_line + f"Contexto recuperado:\n{rag_text}\n"
     messages = [
@@ -188,7 +210,16 @@ Indica señales de alarma y recomienda atención médica cuando sea pertinente.
         {"role": "user", "content": f"Pantalla: {screen_context or 'N/A'}\n{CONTEXT_BLOCK}\nPregunta: {user_msg}".strip()},
     ]
     import ollama
-    out = ollama.chat(model=LLM_MODEL, messages=messages, options={"temperature": 0.2})
+    out = ollama.chat(
+        model=LLM_MODEL,
+        messages=messages,
+        options={
+            "temperature": 0.2,
+            "num_predict": 220,
+            "top_p": 0.9,
+            "keep_alive": "30m",  # ⚡ evita cold start del LLM
+        }
+    )
     reply = (out.get("message") or {}).get("content", "").strip()
     citations_apa = format_apa6_list(metas)
     return reply or "No pude generar una respuesta en este momento.", metas, citations_apa

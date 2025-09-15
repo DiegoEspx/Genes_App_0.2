@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/chat_massage.dart';
+import '../../domain/entities/chat_message.dart';
 import '../bloc/chat_bloc.dart';
 
 class ChatPage extends StatefulWidget {
@@ -24,7 +24,9 @@ class _ChatPageState extends State<ChatPage> {
   void _send(BuildContext context) {
     final text = _ctrl.text;
     _ctrl.clear();
-    context.read<ChatBloc>().add(UserTypedAndSent(text, topic: null, lang: 'es'));
+    context.read<ChatBloc>().add(
+      UserTypedAndSent(text, topic: null, lang: 'es'),
+    );
     Future.delayed(const Duration(milliseconds: 200), () {
       if (_scroll.hasClients) {
         _scroll.animateTo(
@@ -66,12 +68,59 @@ class _ChatPageState extends State<ChatPage> {
                         );
                       }
                       final m = msgs[i];
+                      // dentro del itemBuilder, donde pintas cada mensaje:
                       return Align(
                         alignment:
-                            m.sender == Sender.user ? Alignment.centerRight : Alignment.centerLeft,
+                            m.sender == Sender.user
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: _Bubble(text: m.text, sender: m.sender),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _Bubble(text: m.text, sender: m.sender),
+                              if (m.sender == Sender.bot &&
+                                  m.sources.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Container(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 340,
+                                  ),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Fuentes',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      for (final s in m.sources)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 6,
+                                          ),
+                                          child: SelectableText(
+                                            '• $s',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -116,7 +165,11 @@ class _Bubble extends StatelessWidget {
   final Sender sender;
   final bool isThinking;
 
-  const _Bubble({required this.text, required this.sender, this.isThinking = false});
+  const _Bubble({
+    required this.text,
+    required this.sender,
+    this.isThinking = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -128,22 +181,24 @@ class _Bubble extends StatelessWidget {
         color: isUser ? Colors.blueAccent : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: isThinking
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                SizedBox(
-                  width: 14, height: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 8),
-                Text('Escribiendo…'),
-              ],
-            )
-          : Text(
-              text,
-              style: TextStyle(color: isUser ? Colors.white : Colors.black87),
-            ),
+      child:
+          isThinking
+              ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 8),
+                  Text('Escribiendo…'),
+                ],
+              )
+              : Text(
+                text,
+                style: TextStyle(color: isUser ? Colors.white : Colors.black87),
+              ),
     );
   }
 }

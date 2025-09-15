@@ -177,3 +177,6 @@ def delete_doc_route(
         return {"ok": True, "deleted": 0, "would_delete": stats["count"], "doc_id": doc_id}
     deleted = delete_document(doc_id)
     return {"ok": True, "deleted": deleted, "doc_id": doc_id}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("server:app", host="0.0.0.0", port=5001, reload=True)

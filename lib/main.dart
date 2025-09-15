@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:genesapp/widgets/app_colors.dart';
 import 'firebase_options.dart';
-//import 'package:genesapp/redirect/login.dart';
 import 'package:genesapp/login.dart';
 
 void main() {
@@ -30,17 +29,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _setUserOffline(); // ← Marcar offline al cerrar la app
+    _setUserOffline();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _setUserOnline(); // ← Marcar en línea al volver a la app
+      _setUserOnline();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      _setUserOffline(); // ← Marcar offline al salir o cerrar
+      _setUserOffline();
     }
   }
 
@@ -69,6 +68,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
@@ -81,12 +81,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         }
 
-        _setUserOnline(); // ← Marcar online al iniciar correctamente
+        _setUserOnline();
 
         return MaterialApp(
           title: 'GenesApp',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+          builder: (context, child) {
+            setAndroidNavBar(
+              color: AppColors.white,
+              iconBrightness: Brightness.dark,
+            );
+
+            return child!;
+          },
           home: const LoginScreen(),
         );
       },
@@ -97,13 +105,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark, 
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
+
+    // Deja la STATUS BAR como está en tus pantallas; no la modificamos.
+    // (Edge-to-edge opcional si ya lo usas)
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
+}
+
+/// Pinta SOLO la barra de navegación inferior (Android).
+/// iOS ignora estas opciones (no tiene nav bar del sistema).
+void setAndroidNavBar({
+  required Color color,
+  required Brightness iconBrightness,
+}) {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor: color,
+      systemNavigationBarIconBrightness: iconBrightness,
+      // No tocamos nada de la status bar:
+      // statusBarColor: null,
+      // statusBarIconBrightness: null,
+      // statusBarBrightness: null,
+    ),
+  );
 }

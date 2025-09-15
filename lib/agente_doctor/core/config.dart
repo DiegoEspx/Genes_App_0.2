@@ -1,4 +1,4 @@
 const apiBase = String.fromEnvironment(
   'API_BASE',
-  defaultValue: 'http://10.0.2.2:5001',
+  defaultValue: 'http://192.168.20.30:5001',
 );

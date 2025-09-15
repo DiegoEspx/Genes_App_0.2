@@ -1,4 +1,4 @@
-import '../entities/chat_massage.dart';
+import '../entities/chat_message.dart';
 import '../repositories/chat_repository.dart';
 
 class SendMessage {

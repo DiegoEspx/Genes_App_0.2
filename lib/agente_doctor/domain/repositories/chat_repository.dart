@@ -1,7 +1,6 @@
-import '../entities/chat_massage.dart';
+import '../entities/chat_message.dart';
 
 abstract class ChatRepository {
-  /// Envía el mensaje del usuario y devuelve la respuesta del bot.
   Future<ChatMessage> send(String message,
       {String? topic, String? lang});
 }
