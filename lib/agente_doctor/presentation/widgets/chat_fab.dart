@@ -28,18 +28,20 @@ class ChatFab extends StatelessWidget {
     this.foregroundColor,
   });
 
-  void _openChat(BuildContext context) {
+  Future<void> _openChat(BuildContext context) async {
+    // Datasource con configuración de red y warm-up
     final ds = ChatRemoteDataSource();
+    await ds.warmup(); // 👈 ping a /health para “despertar” el backend
+
     final repo = ChatRepositoryImpl(ds);
     final usecase = SendMessage(repo);
 
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (_) => BlocProvider(
-              create: (_) => ChatBloc(usecase),
-              child: const ChatPage(),
-            ),
+        builder: (_) => BlocProvider(
+          create: (_) => ChatBloc(usecase),
+          child: const ChatPage(),
+        ),
       ),
     );
   }
@@ -83,18 +85,19 @@ class ChatButton extends StatelessWidget {
     this.style,
   });
 
-  void _open(BuildContext context) {
+  Future<void> _open(BuildContext context) async {
     final ds = ChatRemoteDataSource();
+    await ds.warmup(); // 👈 igual que en el FAB
+
     final repo = ChatRepositoryImpl(ds);
     final usecase = SendMessage(repo);
 
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (_) => BlocProvider(
-              create: (_) => ChatBloc(usecase),
-              child: const ChatPage(),
-            ),
+        builder: (_) => BlocProvider(
+          create: (_) => ChatBloc(usecase),
+          child: const ChatPage(),
+        ),
       ),
     );
   }
