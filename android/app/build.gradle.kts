@@ -1,24 +1,14 @@
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services") // Firebase
-    id("kotlin-android")
-    id("dev.flutter.flutter-gradle-plugin") // Flutter
+    id("com.google.gms.google-services") // Firebase (si lo usas)
+    id("org.jetbrains.kotlin.android")
+    id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
     namespace = "com.example.genesapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
-
-    compileOptions {
-        // Sube de 1_8 a 11
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        // Sube de "1.8" a "11"
-        jvmTarget = "11"
-    }
 
     defaultConfig {
         applicationId = "com.example.genesapp"
@@ -28,9 +18,36 @@ android {
         versionName = flutter.versionName
     }
 
+    // ☕ Java/Kotlin 17
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
     buildTypes {
+        getByName("debug") {
+            // En debug no se minifica ni se eliminan recursos
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
         getByName("release") {
+            // Firma de ejemplo (cámbiala si tienes tu keystore de release)
             signingConfig = signingConfigs.getByName("debug")
+
+            // Si NO quieres minificar ni eliminar recursos en release:
+            isMinifyEnabled = false
+            isShrinkResources = false
+
+            // Si en el futuro activas minify/shrink, descomenta:
+            // isMinifyEnabled = true
+            // isShrinkResources = true
+            // proguardFiles(
+            //     getDefaultProguardFile("proguard-android-optimize.txt"),
+            //     "proguard-rules.pro"
+            // )
         }
     }
 }

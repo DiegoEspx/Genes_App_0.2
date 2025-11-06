@@ -18,7 +18,7 @@ class ChatRepositoryImpl implements ChatRepository {
     return ChatMessage(
       text: res.reply,
       sender: Sender.bot,
-      sources: res.citationsApa, // 👈 pasa las APA
+      sources: res.citationsApa,
     );
   }
 }

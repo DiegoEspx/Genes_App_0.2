@@ -6,9 +6,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:genesapp/widgets/app_colors.dart';
 import 'firebase_options.dart';
 import 'package:genesapp/login.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final storage = await HydratedStorage.build(
+    storageDirectory:
+        kIsWeb
+            ? HydratedStorageDirectory.web
+            : HydratedStorageDirectory(
+              (await getApplicationDocumentsDirectory()).path,
+            ),
+  );
+
+  HydratedBloc.storage = storage;
+
   runApp(const MyApp());
 }
 
