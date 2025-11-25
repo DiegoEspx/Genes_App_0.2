@@ -29,19 +29,27 @@ class ChatFab extends StatelessWidget {
   });
 
   Future<void> _openChat(BuildContext context) async {
-    // Datasource con configuración de red y warm-up
+    // Datasource con configuración de red
     final ds = ChatRemoteDataSource();
-    await ds.warmup(); // 👈 ping a /health para “despertar” el backend
+
+    // 🚀 OPTIMIZACIÓN: Ejecutar warmup en paralelo sin bloquear la UI
+    // El warmup ya no bloquea la apertura del chat
+    ds.warmup().catchError((e) {
+      // Ignorar errores de warmup silenciosamente
+      debugPrint('⚠️ Warmup falló: $e');
+    });
 
     final repo = ChatRepositoryImpl(ds);
     final usecase = SendMessage(repo);
 
+    // Abrir el chat inmediatamente sin esperar el warmup
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => ChatBloc(usecase),
-          child: const ChatPage(),
-        ),
+        builder:
+            (_) => BlocProvider(
+              create: (_) => ChatBloc(usecase),
+              child: const ChatPage(),
+            ),
       ),
     );
   }
@@ -87,17 +95,23 @@ class ChatButton extends StatelessWidget {
 
   Future<void> _open(BuildContext context) async {
     final ds = ChatRemoteDataSource();
-    await ds.warmup(); // 👈 igual que en el FAB
+
+    // 🚀 OPTIMIZACIÓN: Warmup en paralelo sin bloquear
+    ds.warmup().catchError((e) {
+      debugPrint('⚠️ Warmup falló: $e');
+    });
 
     final repo = ChatRepositoryImpl(ds);
     final usecase = SendMessage(repo);
 
+    // Abrir inmediatamente
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => ChatBloc(usecase),
-          child: const ChatPage(),
-        ),
+        builder:
+            (_) => BlocProvider(
+              create: (_) => ChatBloc(usecase),
+              child: const ChatPage(),
+            ),
       ),
     );
   }

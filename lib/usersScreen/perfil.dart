@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:genesapp/pacientScreen/verificacion_medico_screen.dart';
+import 'package:genesapp/usersScreen/profile_sections/settings_screen.dart';
+import 'package:genesapp/usersScreen/profile_sections/about_genesapp_screen.dart';
+import 'package:genesapp/usersScreen/profile_sections/developers_screen.dart';
+import 'package:genesapp/usersScreen/profile_sections/privacy_policy_screen.dart';
 import 'package:genesapp/widgets/custom_app_bar_simple.dart';
 import 'package:genesapp/widgets/app_colors.dart';
 
@@ -234,23 +238,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
           ],
         ),
       ),
@@ -359,41 +366,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
 
                     perfilInfoTile(
-                      Icons.history,
-                      "Historial de Predicciones",
-                      "Consulta anteriores análisis",
-                      null,
-                    ),
-                    perfilInfoTile(
-                      Icons.article,
-                      "Mis Publicaciones",
-                      "Casos médicos y debates",
-                      null,
-                    ),
-                    perfilInfoTile(
                       Icons.settings,
                       "Configuración",
                       "Privacidad, notificaciones",
-                      null,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsScreen(),
+                        ),
+                      ),
                     ),
                     const Divider(color: Color(0xFFB0BEC5)),
                     perfilInfoTile(
                       Icons.info,
                       "Acerca de GenesApp",
                       "Descubre más sobre la app",
-                      null,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AboutGenesAppScreen(),
+                        ),
+                      ),
+                      isGreen: true,
                     ),
                     perfilInfoTile(
                       Icons.people,
                       "Desarrolladores",
-                      "Conoce al equipo detrás de GenesApp",
-                      null,
+                      "Diego y Sebastián",
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DevelopersScreen(),
+                        ),
+                      ),
                     ),
                     perfilInfoTile(
                       Icons.policy,
                       "Política de Privacidad",
                       "Consulta nuestras normas",
-                      null,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacyPolicyScreen(),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
                   ],

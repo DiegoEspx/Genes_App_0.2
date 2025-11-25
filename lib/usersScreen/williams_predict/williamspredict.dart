@@ -55,7 +55,7 @@ class _WilliamspredictState extends State<Williamspredict> {
   }
 
   Future<void> _enviarFormulario() async {
-    const url = 'http://10.162.248.191:5000/predict';
+    const url = 'http://10.137.39.33:5000/predict'; 
     try {
       final response = await http.post(
         Uri.parse(url),

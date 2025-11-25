@@ -106,7 +106,7 @@ def obtener_archivo_de_usuario(cedula, filename):
 
 @app.route('/')
 def home():
-    return '🩺 API de Verificación Médica funcionando correctamente (solo PDF e imágenes)'
+    return 'API de Verificación Médica funcionando correctamente (solo PDF e imágenes)'
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001)

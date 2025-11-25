@@ -17,7 +17,7 @@ class AdminVerificacionPendiente extends StatefulWidget {
 }
 
 class _AdminVerificacionPanelState extends State<AdminVerificacionPendiente> {
-  final String baseUrl = 'http://10.162.67.105:5001';
+  final String baseUrl = 'http://10.137.39.33:5001';
   //'https://genesapp.centralus.cloudapp.azure.com/api1';
   List<Map<String, dynamic>> solicitudes = [];
   bool isLoading = false;
@@ -111,7 +111,7 @@ class _AdminVerificacionPanelState extends State<AdminVerificacionPendiente> {
   }
 
   Widget _buildDocumentoVisual(String url) {
-    final fullUrl = "http://10.162.67.105:5001$url";
+    final fullUrl = "http://10.137.39.33:5001$url";
     //'https://genesapp.centralus.cloudapp.azure.com$url';
     final uri = Uri.parse(fullUrl);
     final fileName = url.split('/').last.toLowerCase();

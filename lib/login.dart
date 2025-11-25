@@ -1,14 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:genesapp/usersScreen/screens_guias/guias_screen.dart';
-import 'package:genesapp/widgets/app_colors.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:flutter/services.dart';
 import 'register.dart';
+import 'package:genesapp/usersScreen/screens_guias/guias_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,9 +19,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  final _auth = FirebaseAuth.instance;
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _isLoading = false;
   bool _obscureText = true;
   bool _rememberMe = false;
@@ -33,13 +34,31 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
     _animController.forward();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateBasedOnRole(user);
+      });
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email');
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _rememberMe = true;
+      });
+    }
   }
 
   @override
@@ -55,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       body: Stack(
         children: [
+          // Gradiente teal del diseño original
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -69,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
 
-          // Condicional para evitar crash en emuladores x86
+          // Blur condicional (evita crash en x86)
           if (!kIsWeb && defaultTargetPlatform != TargetPlatform.linux)
             Positioned.fill(
               child: BackdropFilter(
@@ -78,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ),
 
+          // Contenedor central con diseño original (texto blanco)
           Center(
             child: FadeTransition(
               opacity: _fadeAnim,
@@ -111,8 +132,10 @@ class _LoginScreenState extends State<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 20),
+                      // Email field
                       TextField(
                         controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -121,9 +144,9 @@ class _LoginScreenState extends State<LoginScreen>
                           label: 'Correo electrónico',
                           icon: Icons.email,
                         ),
-                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 15),
+                      // Password field
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscureText,
@@ -148,12 +171,15 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                       ),
+                      // Remember me checkbox
                       Row(
                         children: [
                           Checkbox(
                             value: _rememberMe,
                             onChanged:
-                                (value) => setState(() => _rememberMe = value!),
+                                (value) => setState(
+                                  () => _rememberMe = value ?? false,
+                                ),
                             activeColor: Colors.white,
                             checkColor: Colors.teal,
                           ),
@@ -195,19 +221,26 @@ class _LoginScreenState extends State<LoginScreen>
                           padding: const EdgeInsets.only(top: 10),
                           child: Text(
                             _error,
-                            style: const TextStyle(color: Colors.redAccent),
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       TextButton(
                         onPressed: () async {
+                          final scaffoldContext = context;
                           await GoogleSignIn().signOut();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Listo, ahora puedes elegir otra cuenta",
+                          if (mounted) {
+                            ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Listo, ahora puedes elegir otra cuenta",
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         child: const Text(
                           "¿Usar otra cuenta de Google?",
@@ -271,7 +304,14 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         child:
             loading
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
                 : Text(
                   text,
                   style: const TextStyle(
@@ -327,34 +367,81 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      final UserCredential userCredential = await _auth
+          .signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+
+      // Guardar email si el usuario marcó "recordar"
+      final prefs = await SharedPreferences.getInstance();
+      if (_rememberMe) {
+        await prefs.setString('saved_email', _emailController.text.trim());
+      } else {
+        await prefs.remove('saved_email');
+      }
+
       await _navigateBasedOnRole(userCredential.user);
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = e.message ?? 'Error al iniciar sesión');
+      String errorMessage = 'Ocurrió un error al iniciar sesión.';
+      switch (e.code) {
+        case 'user-not-found':
+        case 'invalid-credential':
+          errorMessage = 'Correo o contraseña incorrectos.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Contraseña incorrecta.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'El formato del correo no es válido.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'Esta cuenta ha sido deshabilitada.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Demasiados intentos. Intenta más tarde.';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Error de conexión. Revisa tu internet.';
+          break;
+        default:
+          errorMessage = 'Error: ${e.message}';
+      }
+      setState(() => _error = errorMessage);
+    } catch (_) {
+      setState(() => _error = 'Ocurrió un error inesperado. Intenta de nuevo.');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+    setState(() {
+      _isLoading = true;
+      _error = '';
+    });
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final userCredential = await _auth.signInWithCredential(credential);
-      final user = userCredential.user;
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
+      final User? user = userCredential.user;
 
       if (user != null) {
-        final userDoc =
+        final DocumentSnapshot userDoc =
             await FirebaseFirestore.instance
                 .collection('users')
                 .doc(user.uid)
@@ -367,14 +454,29 @@ class _LoginScreenState extends State<LoginScreen>
               .set({
                 'email': user.email,
                 'role': 'patient',
-                'created_at': DateTime.now(),
+                'name': user.displayName ?? 'Usuario',
+                'photoUrl': user.photoURL,
+                'created_at': FieldValue.serverTimestamp(),
               });
         }
 
         await _navigateBasedOnRole(user);
       }
+    } on PlatformException catch (e) {
+      String msg = 'Error al iniciar con Google.';
+      if (e.code == 'sign_in_failed') {
+        msg = 'Error de configuración de Google (SHA-1). Contacta al soporte.';
+      } else if (e.code == 'network_error') {
+        msg = 'Error de conexión. Revisa tu internet.';
+      }
+      setState(() => _error = msg);
+    } on FirebaseAuthException catch (e) {
+      setState(() => _error = 'Error de autenticación: ${e.message}');
     } catch (e) {
-      setState(() => _error = 'Error al iniciar sesión con Google');
+      setState(() => _error = 'No se pudo iniciar sesión con Google.');
+      debugPrint('Error Google Sign-In: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

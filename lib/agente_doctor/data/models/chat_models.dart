@@ -1,4 +1,5 @@
-// lib/agente_doctor/data/models/chat_models.dart
+import 'package:flutter/foundation.dart';
+
 class ChatRequestModel {
   final String message;
   final String? context;
@@ -28,17 +29,45 @@ class ChatRequestModel {
 
 class ChatResponseModel {
   final String reply;
-  final List<String> citationsApa; // ← para “Fuentes”
+  final List<String> citationsApa;
 
-  ChatResponseModel({required this.reply, this.citationsApa = const []});
+  ChatResponseModel({required this.reply, List<String>? citationsApa})
+    : citationsApa = citationsApa ?? [];
 
   factory ChatResponseModel.fromJson(Map<String, dynamic> json) {
-    final apa =
-        (json['citations_apa'] as List?)?.map((e) => e.toString()).toList() ??
-        const [];
-    return ChatResponseModel(
-      reply: (json['reply'] ?? '').toString(),
-      citationsApa: apa,
-    );
+    // 🔍 DEBUG: Log del JSON crudo
+    if (kDebugMode) {
+      print('📦 [ChatModel] JSON recibido: ${json.keys}');
+      print('📦 [ChatModel] citations_apa raw: ${json['citations_apa']}');
+    }
+
+    final reply = (json['reply'] ?? '').toString();
+
+    // Parseo robusto de citations_apa
+    List<String> citations = [];
+    final rawCitations = json['citations_apa'];
+
+    if (rawCitations is List) {
+      citations =
+          rawCitations
+              .where((e) => e != null)
+              .map((e) => e.toString().trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
+    }
+
+    // 🔍 DEBUG: Log del resultado
+    if (kDebugMode) {
+      print('📦 [ChatModel] Citations parseadas: ${citations.length}');
+      if (citations.isNotEmpty) {
+        print('📦 [ChatModel] Primera citation: ${citations.first}');
+      }
+    }
+
+    return ChatResponseModel(reply: reply, citationsApa: citations);
   }
+
+  @override
+  String toString() =>
+      'ChatResponseModel(reply: ${reply.length} chars, citations: ${citationsApa.length})';
 }

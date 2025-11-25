@@ -6,26 +6,29 @@ class ChatRemoteDataSource {
   final Dio _dio;
 
   ChatRemoteDataSource([Dio? dio])
-      : _dio = dio ??
-            Dio(
-              BaseOptions(
-                baseUrl: apiBase,
-                connectTimeout: const Duration(seconds: 10),
-                receiveTimeout: const Duration(seconds: 60),
-                sendTimeout: const Duration(seconds: 60),
-                headers: {'Content-Type': 'application/json'},
-                // (opcional) En algunos entornos conviene no mantener conexión persistente
-                // persistentConnection: false, // si tu versión de Dio lo soporta
+    : _dio =
+          dio ??
+                Dio(
+                  BaseOptions(
+                    baseUrl: apiBase,
+                    connectTimeout: const Duration(
+                      seconds: 30,
+                    ), // Aumentado para red local
+                    receiveTimeout: const Duration(seconds: 60),
+                    sendTimeout: const Duration(seconds: 60),
+                    headers: {'Content-Type': 'application/json'},
+                    // (opcional) En algunos entornos conviene no mantener conexión persistente
+                    // persistentConnection: false, // si tu versión de Dio lo soporta
+                  ),
+                )
+            ..interceptors.add(
+              LogInterceptor(
+                request: true,
+                requestBody: true,
+                responseBody: true,
+                error: true,
               ),
-            )
-          ..interceptors.add(
-            LogInterceptor(
-              request: true,
-              requestBody: true,
-              responseBody: true,
-              error: true,
-            ),
-          );
+            );
 
   /// “Despierta” el backend (especialmente útil en Railway) llamando a /health.
   /// Ignora cualquier error: solo es un ping.
@@ -56,9 +59,10 @@ class ChatRemoteDataSource {
           'Tiempo de espera agotado. El backend tardó demasiado en responder.',
         );
       }
-      final msg = e.response?.data is Map
-          ? (e.response?.data['detail']?.toString() ?? e.message)
-          : e.message;
+      final msg =
+          e.response?.data is Map
+              ? (e.response?.data['detail']?.toString() ?? e.message)
+              : e.message;
       throw Exception('Error de red: $msg');
     }
   }

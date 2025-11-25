@@ -57,4 +57,4 @@ def ver_pdf(filename):
 
 if __name__ == '__main__':
     # Servidor accesible desde otros dispositivos en la misma red
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)
